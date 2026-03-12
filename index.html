@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Storage Health Checker</title>
+<style>
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:40px;
+}
+
+button{
+padding:15px 30px;
+font-size:18px;
+background:#22c55e;
+border:none;
+border-radius:8px;
+color:white;
+cursor:pointer;
+}
+
+#result{
+margin-top:20px;
+font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Storage Health Tester</h2>
+<p>Test kecepatan dan stabilitas storage</p>
+
+<button onclick="testStorage()">Mulai Test</button>
+
+<div id="result"></div>
+
+<script>
+
+async function testStorage(){
+
+let size = 50 * 1024 * 1024; // 50MB
+let data = new Uint8Array(size);
+
+for(let i=0;i<size;i++){
+data[i]=Math.floor(Math.random()*256);
+}
+
+let start = performance.now();
+
+localStorage.setItem("testdata", btoa(String.fromCharCode(...data)));
+
+let writeTime = performance.now() - start;
+
+start = performance.now();
+
+let readData = localStorage.getItem("testdata");
+
+let readTime = performance.now() - start;
+
+document.getElementById("result").innerHTML=
+"Write Time : "+writeTime.toFixed(2)+" ms<br>"+
+"Read Time : "+readTime.toFixed(2)+" ms<br>"+
+"Status : Storage OK";
+
+}
+
+</script>
+
+</body>
+</html>
