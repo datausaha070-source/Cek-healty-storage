@@ -2,21 +2,27 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HP Service Detector</title>
+<title>HP Service Web Tool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+
 body{
 font-family:Arial;
-background:#0f172a;
+background:#020617;
 color:white;
 text-align:center;
-padding:40px;
+padding:20px;
+}
+
+h1{
+margin-bottom:5px;
 }
 
 button{
-padding:14px 25px;
-margin:10px;
-font-size:16px;
+padding:12px 20px;
+margin:6px;
+font-size:15px;
 background:#22c55e;
 border:none;
 border-radius:8px;
@@ -24,24 +30,94 @@ color:white;
 cursor:pointer;
 }
 
+button:hover{
+background:#16a34a;
+}
+
 #log{
 margin-top:20px;
-background:#020617;
+background:#0f172a;
 padding:20px;
 border-radius:10px;
 text-align:left;
+min-height:150px;
 }
+
+table{
+width:100%;
+margin-top:10px;
+border-collapse:collapse;
+}
+
+td{
+padding:6px;
+border-bottom:1px solid #334155;
+}
+
 </style>
 </head>
 
 <body>
 
-<h2>HP Service Tool (Web)</h2>
+<h1>HP Service Web Tool</h1>
+<p>Deteksi HP + Baca Spesifikasi</p>
 
+<button onclick="connectADB()">Hubungkan HP (ADB)</button>
 <button onclick="detectUSB()">Deteksi USB</button>
-<button onclick="detectSerial()">Deteksi Port</button>
+<button onclick="testStorage()">Test Storage</button>
 
-<div id="log">Status : menunggu perangkat...</div>
+<div id="log">
+Status : menunggu perangkat...
+</div>
+
+<script type="module">
+
+import { Adb } from "https://cdn.jsdelivr.net/npm/@yume-chan/adb";
+
+let device;
+
+async function connectADB(){
+
+try{
+
+const usb = await navigator.usb.requestDevice({
+filters:[{classCode:255}]
+})
+
+device = await Adb.open(usb)
+
+const brand = await getProp("ro.product.brand")
+const model = await getProp("ro.product.model")
+const android = await getProp("ro.build.version.release")
+const cpu = await getProp("ro.product.cpu.abi")
+
+document.getElementById("log").innerHTML=
+"<b>HP Terhubung</b><br><br>"+
+"<table>"+
+"<tr><td>Brand</td><td>"+brand+"</td></tr>"+
+"<tr><td>Model</td><td>"+model+"</td></tr>"+
+"<tr><td>Android</td><td>"+android+"</td></tr>"+
+"<tr><td>CPU</td><td>"+cpu+"</td></tr>"+
+"</table>"
+
+}catch(e){
+
+document.getElementById("log").innerHTML=
+"Gagal terhubung. Pastikan USB Debugging aktif."
+
+}
+
+}
+
+async function getProp(prop){
+
+const shell = await device.subprocess.shell("getprop "+prop)
+const text = await shell.stdout.text()
+return text.trim()
+
+}
+
+</script>
 
 <script>
 
@@ -51,38 +127,49 @@ try{
 
 const device = await navigator.usb.requestDevice({
 filters:[]
-});
+})
 
 document.getElementById("log").innerHTML=
-"Perangkat ditemukan<br><br>"+
+"<b>USB Device</b><br><br>"+
 "Nama : "+device.productName+"<br>"+
 "Vendor ID : "+device.vendorId+"<br>"+
-"Product ID : "+device.productId;
+"Product ID : "+device.productId
 
 }catch(e){
 
 document.getElementById("log").innerHTML=
-"Tidak ada perangkat dipilih";
+"Tidak ada perangkat dipilih"
 
 }
 
 }
 
-async function detectSerial(){
+async function testStorage(){
 
-try{
+let size = 5 * 1024 * 1024
+let data = new Uint8Array(size)
 
-const port = await navigator.serial.requestPort();
+for(let i=0;i<size;i++){
+data[i]=Math.random()*255
+}
+
+let start = performance.now()
+
+localStorage.setItem("testdata",btoa(String.fromCharCode(...data)))
+
+let writeTime = performance.now() - start
+
+start = performance.now()
+
+localStorage.getItem("testdata")
+
+let readTime = performance.now() - start
 
 document.getElementById("log").innerHTML=
-"Port Serial terdeteksi";
-
-}catch(e){
-
-document.getElementById("log").innerHTML=
-"Gagal membaca port";
-
-}
+"<b>Storage Test</b><br><br>"+
+"Write Time : "+writeTime.toFixed(2)+" ms<br>"+
+"Read Time : "+readTime.toFixed(2)+" ms<br>"+
+"Status : OK"
 
 }
 
