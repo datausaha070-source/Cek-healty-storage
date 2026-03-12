@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Storage Health Checker</title>
+<title>HP Detector</title>
+
 <style>
 body{
 font-family:Arial;
@@ -17,54 +18,40 @@ padding:15px 30px;
 font-size:18px;
 background:#22c55e;
 border:none;
-border-radius:8px;
+border-radius:10px;
 color:white;
 cursor:pointer;
-}
-
-#result{
-margin-top:20px;
-font-size:18px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Storage Health Tester</h2>
-<p>Test kecepatan dan stabilitas storage</p>
+<h2>Deteksi HP via USB</h2>
 
-<button onclick="testStorage()">Mulai Test</button>
+<button onclick="connectUSB()">Hubungkan HP</button>
 
-<div id="result"></div>
+<p id="hasil"></p>
 
 <script>
 
-async function testStorage(){
+async function connectUSB(){
 
-let size = 50 * 1024 * 1024; // 50MB
-let data = new Uint8Array(size);
+try{
 
-for(let i=0;i<size;i++){
-data[i]=Math.floor(Math.random()*256);
+const device = await navigator.usb.requestDevice({
+filters:[]
+});
+
+document.getElementById("hasil").innerHTML =
+"Perangkat terdeteksi: "+device.productName;
+
+}catch(e){
+
+document.getElementById("hasil").innerHTML =
+"Gagal mendeteksi perangkat";
+
 }
-
-let start = performance.now();
-
-localStorage.setItem("testdata", btoa(String.fromCharCode(...data)));
-
-let writeTime = performance.now() - start;
-
-start = performance.now();
-
-let readData = localStorage.getItem("testdata");
-
-let readTime = performance.now() - start;
-
-document.getElementById("result").innerHTML=
-"Write Time : "+writeTime.toFixed(2)+" ms<br>"+
-"Read Time : "+readTime.toFixed(2)+" ms<br>"+
-"Status : Storage OK";
 
 }
 
