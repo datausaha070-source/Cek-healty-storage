@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panic Full Analyzer Interaktif</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 15px;
+}
+
+h1 {
+    text-align: center;
+    color: #38bdf8;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+}
+
+input, textarea, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
+    border: none;
+}
+
+textarea {
+    height: 100px;
+}
+
+button {
+    background: #22c55e;
+    color: white;
+    font-weight: bold;
+}
+
+.card {
+    background: #1e293b;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.type {
+    color: #facc15;
+    font-weight: bold;
+}
+
+.result {
+    color: #22c55e;
+}
+
+.delete {
+    background: #ef4444;
+    margin-top: 5px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Panic Full Analyzer</h1>
+
+<textarea id="logInput" placeholder="Paste panicString di sini..."></textarea>
+<button onclick="tambahData()">Analisa & Simpan</button>
+
+<div id="listData"></div>
+
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("panicData")) || [];
+
+function analisa(text) {
+    text = text.toLowerCase();
+
+    if(text.includes("missing")) return "Sensor / Flex";
+    if(text.includes("watchdog")) return "IC / Jalur komunikasi";
+    if(text.includes("baseband")) return "Signal / Baseband";
+    if(text.includes("nand")) return "Memory / Storage";
+    if(text.includes("thermal")) return "Suhu / Overheat";
+    if(text.includes("power") || text.includes("pmu")) return "Power / Tegangan";
+    if(text.includes("i2c")) return "Jalur komunikasi IC";
+
+    return "Tidak diketahui";
+}
+
+function tambahData() {
+    let input = document.getElementById("logInput").value;
+    if(input === "") return;
+
+    let hasil = analisa(input);
+
+    data.push({
+        log: input,
+        hasil: hasil
+    });
+
+    localStorage.setItem("panicData", JSON.stringify(data));
+    document.getElementById("logInput").value = "";
+    tampilkan();
+}
+
+function hapus(index) {
+    data.splice(index,1);
+    localStorage.setItem("panicData", JSON.stringify(data));
+    tampilkan();
+}
+
+function tampilkan() {
+    let html = "";
+    data.forEach((item, i) => {
+        html += `
+        <div class="card">
+            <div class="type">${item.hasil}</div>
+            <div>${item.log}</div>
+            <button class="delete" onclick="hapus(${i})">Hapus</button>
+        </div>
+        `;
+    });
+
+    document.getElementById("listData").innerHTML = html;
+}
+
+tampilkan();
+</script>
+
+</body>
+</html>
