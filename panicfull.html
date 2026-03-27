@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panic Full Analyzer Interaktif</title>
+<title>Panic Full Analyzer PRO</title>
 
 <style>
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background: #0f172a;
     color: #e2e8f0;
     padding: 15px;
@@ -18,21 +18,12 @@ h1 {
     color: #38bdf8;
 }
 
-.container {
-    max-width: 500px;
-    margin: auto;
-}
-
-input, textarea, button {
+textarea, button {
     width: 100%;
     padding: 10px;
     margin-top: 8px;
     border-radius: 8px;
     border: none;
-}
-
-textarea {
-    height: 100px;
 }
 
 button {
@@ -53,85 +44,82 @@ button {
     font-weight: bold;
 }
 
-.result {
+.detail {
     color: #22c55e;
+    margin-top: 5px;
 }
 
 .delete {
-    background: #ef4444;
+    background: red;
     margin-top: 5px;
 }
 </style>
-
 </head>
 <body>
 
-<div class="container">
-
-<h1>Panic Full Analyzer</h1>
+<h1>Panic Full Analyzer PRO</h1>
 
 <textarea id="logInput" placeholder="Paste panicString di sini..."></textarea>
-<button onclick="tambahData()">Analisa & Simpan</button>
+<button onclick="tambah()">Analisa</button>
 
-<div id="listData"></div>
-
-</div>
+<div id="hasil"></div>
 
 <script>
-let data = JSON.parse(localStorage.getItem("panicData")) || [];
-
 function analisa(text) {
     text = text.toLowerCase();
 
-    if(text.includes("missing")) return "Sensor / Flex";
-    if(text.includes("watchdog")) return "IC / Jalur komunikasi";
-    if(text.includes("baseband")) return "Signal / Baseband";
-    if(text.includes("nand")) return "Memory / Storage";
-    if(text.includes("thermal")) return "Suhu / Overheat";
-    if(text.includes("power") || text.includes("pmu")) return "Power / Tegangan";
-    if(text.includes("i2c")) return "Jalur komunikasi IC";
+    // SENSOR DETAIL
+    if(text.includes("mic1")) return ["Mic Atas", "Flex audio / mic1 rusak"];
+    if(text.includes("mic2")) return ["Mic Bawah", "Dock / charging flex"];
+    if(text.includes("prox")) return ["Proximity", "Flex sensor atas"];
+    if(text.includes("als")) return ["Ambient Light", "Sensor cahaya"];
+    if(text.includes("barometer")) return ["Barometer", "IC barometer"];
+    if(text.includes("gyro")) return ["Gyroscope", "IC gyro"];
+    if(text.includes("accel")) return ["Accelerometer", "IC sensor gerak"];
 
-    return "Tidak diketahui";
+    // FACE ID
+    if(text.includes("face")) return ["Face ID", "Flex kamera depan / dot projector"];
+
+    // BASEBAND
+    if(text.includes("baseband")) return ["Signal", "IC baseband / jalur RF"];
+
+    // NAND / STORAGE
+    if(text.includes("nand")) return ["Memory", "IC NAND rusak"];
+    if(text.includes("apfs")) return ["Storage System", "File system error / NAND"];
+
+    // POWER
+    if(text.includes("pmu") || text.includes("power")) return ["Power", "IC power / short"];
+    if(text.includes("vdd")) return ["Tegangan", "Drop tegangan jalur"];
+
+    // WATCHDOG
+    if(text.includes("watchdog")) return ["Watchdog", "IC tidak respon"];
+
+    // I2C
+    if(text.includes("i2c")) return ["Jalur I2C", "Komunikasi antar IC putus"];
+
+    // THERMAL
+    if(text.includes("thermal")) return ["Suhu", "Sensor suhu / overheating"];
+
+    // CPU / KERNEL
+    if(text.includes("cpu")) return ["CPU", "Kemungkinan CPU / jalur utama"];
+
+    return ["Tidak diketahui", "Perlu analisa manual"];
 }
 
-function tambahData() {
+function tambah() {
     let input = document.getElementById("logInput").value;
     if(input === "") return;
 
     let hasil = analisa(input);
 
-    data.push({
-        log: input,
-        hasil: hasil
-    });
-
-    localStorage.setItem("panicData", JSON.stringify(data));
-    document.getElementById("logInput").value = "";
-    tampilkan();
-}
-
-function hapus(index) {
-    data.splice(index,1);
-    localStorage.setItem("panicData", JSON.stringify(data));
-    tampilkan();
-}
-
-function tampilkan() {
-    let html = "";
-    data.forEach((item, i) => {
-        html += `
+    document.getElementById("hasil").innerHTML = `
         <div class="card">
-            <div class="type">${item.hasil}</div>
-            <div>${item.log}</div>
-            <button class="delete" onclick="hapus(${i})">Hapus</button>
+            <div class="type">${hasil[0]}</div>
+            <div>${input}</div>
+            <div class="detail">${hasil[1]}</div>
         </div>
-        `;
-    });
-
-    document.getElementById("listData").innerHTML = html;
+    `;
 }
-
-tampilkan();
 </script>
 
 </body>
