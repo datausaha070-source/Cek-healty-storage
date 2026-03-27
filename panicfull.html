@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panic Full Analyzer PRO</title>
+<title>Database Panic Full</title>
 
 <style>
 body {
@@ -18,107 +18,156 @@ h1 {
     color: #38bdf8;
 }
 
-textarea, button {
+input {
     width: 100%;
     padding: 10px;
-    margin-top: 8px;
     border-radius: 8px;
     border: none;
-}
-
-button {
-    background: #22c55e;
-    color: white;
-    font-weight: bold;
+    margin-bottom: 15px;
 }
 
 .card {
     background: #1e293b;
     padding: 12px;
     border-radius: 10px;
-    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
-.type {
+.title {
     color: #facc15;
     font-weight: bold;
 }
 
-.detail {
+.desc {
+    margin-top: 5px;
     color: #22c55e;
-    margin-top: 5px;
-}
-
-.delete {
-    background: red;
-    margin-top: 5px;
 }
 </style>
 </head>
 <body>
 
-<h1>Panic Full Analyzer PRO</h1>
+<h1>Database Panic Full</h1>
 
-<textarea id="logInput" placeholder="Paste panicString di sini..."></textarea>
-<button onclick="tambah()">Analisa</button>
+<input type="text" id="search" placeholder="Cari panic..." onkeyup="cari()">
 
-<div id="hasil"></div>
+<div id="list">
+
+<div class="card">
+<div class="title">missing sensor mic1</div>
+<div class="desc">Mic atas / audio flex rusak</div>
+</div>
+
+<div class="card">
+<div class="title">missing sensor mic2</div>
+<div class="desc">Mic bawah / charging flex</div>
+</div>
+
+<div class="card">
+<div class="title">missing sensor prox</div>
+<div class="desc">Proximity / sensor atas</div>
+</div>
+
+<div class="card">
+<div class="title">missing sensor als</div>
+<div class="desc">Ambient light sensor</div>
+</div>
+
+<div class="card">
+<div class="title">missing sensor barometer</div>
+<div class="desc">IC barometer rusak</div>
+</div>
+
+<div class="card">
+<div class="title">missing sensor gyro</div>
+<div class="desc">IC gyroscope</div>
+</div>
+
+<div class="card">
+<div class="title">missing sensor accel</div>
+<div class="desc">Accelerometer</div>
+</div>
+
+<div class="card">
+<div class="title">face id panic</div>
+<div class="desc">Flex kamera depan / dot projector</div>
+</div>
+
+<div class="card">
+<div class="title">watchdog timeout</div>
+<div class="desc">IC tidak respon / jalur putus</div>
+</div>
+
+<div class="card">
+<div class="title">userspace watchdog timeout</div>
+<div class="desc">Bisa software / hardware ringan</div>
+</div>
+
+<div class="card">
+<div class="title">baseband panic</div>
+<div class="desc">IC signal / jalur RF</div>
+</div>
+
+<div class="card">
+<div class="title">baseband timeout</div>
+<div class="desc">Komunikasi CPU ke baseband gagal</div>
+</div>
+
+<div class="card">
+<div class="title">no service + panic</div>
+<div class="desc">Baseband rusak</div>
+</div>
+
+<div class="card">
+<div class="title">nand panic</div>
+<div class="desc">IC NAND rusak</div>
+</div>
+
+<div class="card">
+<div class="title">apfs error</div>
+<div class="desc">File system / storage error</div>
+</div>
+
+<div class="card">
+<div class="title">thermal panic</div>
+<div class="desc">Sensor suhu / overheating</div>
+</div>
+
+<div class="card">
+<div class="title">pmu panic</div>
+<div class="desc">IC power bermasalah</div>
+</div>
+
+<div class="card">
+<div class="title">power error</div>
+<div class="desc">Tegangan drop / short</div>
+</div>
+
+<div class="card">
+<div class="title">i2c error</div>
+<div class="desc">Jalur komunikasi antar IC</div>
+</div>
+
+<div class="card">
+<div class="title">cpu panic</div>
+<div class="desc">CPU / jalur utama bermasalah</div>
+</div>
+
+<div class="card">
+<div class="title">panic-full</div>
+<div class="desc">Log penuh, indikasi sering crash</div>
+</div>
+
+</div>
 
 <script>
-function analisa(text) {
-    text = text.toLowerCase();
+function cari() {
+    let input = document.getElementById("search").value.toLowerCase();
+    let cards = document.querySelectorAll(".card");
 
-    // SENSOR DETAIL
-    if(text.includes("mic1")) return ["Mic Atas", "Flex audio / mic1 rusak"];
-    if(text.includes("mic2")) return ["Mic Bawah", "Dock / charging flex"];
-    if(text.includes("prox")) return ["Proximity", "Flex sensor atas"];
-    if(text.includes("als")) return ["Ambient Light", "Sensor cahaya"];
-    if(text.includes("barometer")) return ["Barometer", "IC barometer"];
-    if(text.includes("gyro")) return ["Gyroscope", "IC gyro"];
-    if(text.includes("accel")) return ["Accelerometer", "IC sensor gerak"];
-
-    // FACE ID
-    if(text.includes("face")) return ["Face ID", "Flex kamera depan / dot projector"];
-
-    // BASEBAND
-    if(text.includes("baseband")) return ["Signal", "IC baseband / jalur RF"];
-
-    // NAND / STORAGE
-    if(text.includes("nand")) return ["Memory", "IC NAND rusak"];
-    if(text.includes("apfs")) return ["Storage System", "File system error / NAND"];
-
-    // POWER
-    if(text.includes("pmu") || text.includes("power")) return ["Power", "IC power / short"];
-    if(text.includes("vdd")) return ["Tegangan", "Drop tegangan jalur"];
-
-    // WATCHDOG
-    if(text.includes("watchdog")) return ["Watchdog", "IC tidak respon"];
-
-    // I2C
-    if(text.includes("i2c")) return ["Jalur I2C", "Komunikasi antar IC putus"];
-
-    // THERMAL
-    if(text.includes("thermal")) return ["Suhu", "Sensor suhu / overheating"];
-
-    // CPU / KERNEL
-    if(text.includes("cpu")) return ["CPU", "Kemungkinan CPU / jalur utama"];
-
-    return ["Tidak diketahui", "Perlu analisa manual"];
-}
-
-function tambah() {
-    let input = document.getElementById("logInput").value;
-    if(input === "") return;
-
-    let hasil = analisa(input);
-
-    document.getElementById("hasil").innerHTML = `
-        <div class="card">
-            <div class="type">${hasil[0]}</div>
-            <div>${input}</div>
-            <div class="detail">${hasil[1]}</div>
-        </div>
-    `;
+    cards.forEach(card => {
+        let text = card.innerText.toLowerCase();
+        card.style.display = text.includes(input) ? "block" : "none";
+    });
 }
 </script>
 
